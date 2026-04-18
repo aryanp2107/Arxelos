@@ -164,10 +164,34 @@
             100% { transform: translate(-40px, 30px) scale(1.1); }
         }
 
+        .hero-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 3rem;
+            width: 100%;
+        }
+
         .hero-content {
             position: relative;
             z-index: 2;
-            max-width: 820px;
+            max-width: 620px;
+            flex-shrink: 0;
+        }
+
+        .hero-visual {
+            position: relative;
+            width: 420px;
+            height: 420px;
+            flex-shrink: 0;
+            z-index: 2;
+            opacity: 0;
+            animation: fadeUp 1s var(--ease-out-expo) 0.9s forwards;
+        }
+
+        .hero-visual canvas {
+            width: 100%;
+            height: 100%;
         }
 
         .hero-eyebrow {
@@ -646,6 +670,8 @@
 
             /* Hero — contain glow, scale type */
             .hero { min-height: 90vh; }
+            .hero-inner { flex-direction: column; }
+            .hero-visual { width: 280px; height: 280px; order: -1; margin-bottom: -1rem; }
             .hero h1 { font-size: clamp(2.2rem, 8vw, 3.5rem); }
             .hero-description { font-size: 1rem; }
             .hero-bg-glow { width: 300px; height: 300px; right: -20%; top: 10%; }
@@ -724,29 +750,34 @@
 <section class="hero">
     <div class="hero-bg-glow"></div>
     <div class="container">
-        <div class="hero-content">
-            <div class="hero-eyebrow">Neuro-AI Research Platform</div>
-            <h1>Intelligence at the<br>edge of <em>biology.</em></h1>
-            <p class="hero-description">
-                Arxelos deploys research-grade AI models at the intersection of neuroscience and deep learning. Each model is a working artifact — built to demonstrate, not just describe.
-            </p>
-            <div class="hero-cta-row">
-                <a href="#models" class="btn-primary">Explore models ↓</a>
-                <a href="https://github.com/aryanp2107/Arxelos" target="_blank" class="btn-ghost">View source</a>
+        <div class="hero-inner">
+            <div class="hero-content">
+                <div class="hero-eyebrow">Neuro-AI Research Platform</div>
+                <h1>Intelligence at the<br>edge of <em>biology.</em></h1>
+                <p class="hero-description">
+                    Arxelos deploys research-grade AI models at the intersection of neuroscience and deep learning. Each model is a working artifact — built to demonstrate, not just describe.
+                </p>
+                <div class="hero-cta-row">
+                    <a href="#models" class="btn-primary">Explore models ↓</a>
+                    <a href="https://github.com/aryanp2107/Arxelos" target="_blank" class="btn-ghost">View source</a>
+                </div>
+                <div class="hero-status">
+                    <div class="status-item">
+                        <span class="status-label">Models</span>
+                        <span class="status-value">3</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">Status</span>
+                        <span class="status-value">1 Model Live</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">Stack</span>
+                        <span class="status-value">PyTorch + FastAPI</span>
+                    </div>
+                </div>
             </div>
-            <div class="hero-status">
-                <div class="status-item">
-                    <span class="status-label">Models</span>
-                    <span class="status-value">3</span>
-                </div>
-                <div class="status-item">
-                    <span class="status-label">Status</span>
-                    <span class="status-value">1 Model Live</span>
-                </div>
-                <div class="status-item">
-                    <span class="status-label">Stack</span>
-                    <span class="status-value">PyTorch + FastAPI</span>
-                </div>
+            <div class="hero-visual">
+                <canvas id="neuralCanvas"></canvas>
             </div>
         </div>
     </div>
@@ -935,6 +966,161 @@
 
 <!-- ========== SCRIPTS ========== -->
 <script>
+    // ========== NEURAL PARTICLE NETWORK ==========
+    (function() {
+        const canvas = document.getElementById('neuralCanvas');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+
+        const accent = { r: 196, g: 240, b: 66 };
+        const secondary = { r: 94, g: 173, b: 240 };
+        const dim = { r: 139, g: 141, b: 144 };
+
+        let width, height, dpr;
+        let particles = [];
+        let mouse = { x: -1000, y: -1000 };
+        const PARTICLE_COUNT = 60;
+        const CONNECTION_DIST = 100;
+        const MOUSE_RADIUS = 120;
+
+        function resize() {
+            const rect = canvas.parentElement.getBoundingClientRect();
+            dpr = window.devicePixelRatio || 1;
+            width = rect.width;
+            height = rect.height;
+            canvas.width = width * dpr;
+            canvas.height = height * dpr;
+            canvas.style.width = width + 'px';
+            canvas.style.height = height + 'px';
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        }
+
+        function createParticles() {
+            particles = [];
+            for (let i = 0; i < PARTICLE_COUNT; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const radius = Math.random() * (width * 0.42);
+                const cx = width / 2;
+                const cy = height / 2;
+                particles.push({
+                    x: cx + Math.cos(angle) * radius,
+                    y: cy + Math.sin(angle) * radius,
+                    vx: (Math.random() - 0.5) * 0.4,
+                    vy: (Math.random() - 0.5) * 0.4,
+                    radius: Math.random() * 2 + 1,
+                    color: Math.random() < 0.3 ? accent : Math.random() < 0.5 ? secondary : dim,
+                    pulse: Math.random() * Math.PI * 2,
+                    pulseSpeed: 0.01 + Math.random() * 0.02,
+                });
+            }
+        }
+
+        function drawParticle(p, alpha) {
+            const pulseAlpha = 0.4 + Math.sin(p.pulse) * 0.3;
+            const finalAlpha = pulseAlpha * alpha;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(${p.color.r},${p.color.g},${p.color.b},${finalAlpha})`;
+            ctx.fill();
+
+            // Glow for accent particles
+            if (p.color === accent && p.radius > 1.5) {
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.radius * 3, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(${accent.r},${accent.g},${accent.b},${finalAlpha * 0.1})`;
+                ctx.fill();
+            }
+        }
+
+        function drawConnection(a, b, dist) {
+            const alpha = (1 - dist / CONNECTION_DIST) * 0.2;
+            const isAccent = a.color === accent || b.color === accent;
+            const col = isAccent ? accent : dim;
+            ctx.beginPath();
+            ctx.moveTo(a.x, a.y);
+            ctx.lineTo(b.x, b.y);
+            ctx.strokeStyle = `rgba(${col.r},${col.g},${col.b},${alpha})`;
+            ctx.lineWidth = 0.5;
+            ctx.stroke();
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, width, height);
+            const cx = width / 2;
+            const cy = height / 2;
+            const maxDrift = width * 0.46;
+
+            for (let i = 0; i < particles.length; i++) {
+                const p = particles[i];
+                p.pulse += p.pulseSpeed;
+
+                // Mouse repulsion
+                const mdx = p.x - mouse.x;
+                const mdy = p.y - mouse.y;
+                const mDist = Math.sqrt(mdx * mdx + mdy * mdy);
+                if (mDist < MOUSE_RADIUS && mDist > 0) {
+                    const force = (1 - mDist / MOUSE_RADIUS) * 0.8;
+                    p.vx += (mdx / mDist) * force;
+                    p.vy += (mdy / mDist) * force;
+                }
+
+                // Gentle pull toward center (keeps particles clustered)
+                const dx = p.x - cx;
+                const dy = p.y - cy;
+                const distFromCenter = Math.sqrt(dx * dx + dy * dy);
+                if (distFromCenter > maxDrift) {
+                    p.vx -= dx * 0.001;
+                    p.vy -= dy * 0.001;
+                }
+
+                // Damping
+                p.vx *= 0.99;
+                p.vy *= 0.99;
+
+                p.x += p.vx;
+                p.y += p.vy;
+
+                // Fade based on distance from center
+                const fadeAlpha = Math.max(0, 1 - distFromCenter / (maxDrift * 1.2));
+
+                drawParticle(p, fadeAlpha);
+
+                // Connections
+                for (let j = i + 1; j < particles.length; j++) {
+                    const q = particles[j];
+                    const cdx = p.x - q.x;
+                    const cdy = p.y - q.y;
+                    const cDist = Math.sqrt(cdx * cdx + cdy * cdy);
+                    if (cDist < CONNECTION_DIST) {
+                        drawConnection(p, q, cDist);
+                    }
+                }
+            }
+
+            requestAnimationFrame(animate);
+        }
+
+        // Mouse tracking on the canvas
+        canvas.parentElement.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            mouse.x = e.clientX - rect.left;
+            mouse.y = e.clientY - rect.top;
+        });
+        canvas.parentElement.addEventListener('mouseleave', () => {
+            mouse.x = -1000;
+            mouse.y = -1000;
+        });
+
+        window.addEventListener('resize', () => {
+            resize();
+            createParticles();
+        });
+
+        resize();
+        createParticles();
+        animate();
+    })();
+
     // Nav scroll effect
     const nav = document.getElementById('nav');
     window.addEventListener('scroll', () => {
