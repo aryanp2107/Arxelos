@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arxelos — Intelligence at the Edge of Biology</title>
+    <meta name="description" content="Arxelos is a research-grade AI platform deploying models at the intersection of neuroscience and deep learning. Brain tumor classification, neural interpretability, and medical literature retrieval.">
+    <meta name="author" content="Aryan Patel">
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="Arxelos — Intelligence at the Edge of Biology">
+    <meta property="og:description" content="Purpose-driven intelligence built for the problems worth solving.">
+    <meta property="og:url" content="https://arxelos.com">
+    <meta property="og:type" content="website">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <style>
+        /* ========== RESET & VARIABLES ========== */
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg-primary: #08090a;
+            --bg-elevated: #111214;
+            --bg-card: #16181b;
+            --border: #222528;
+            --border-hover: #3a3d42;
+
+            --text-primary: #e8e6e3;
+            --text-secondary: #8b8d90;
+            --text-muted: #55585c;
+
+            --accent: #c4f042;
+            --accent-dim: rgba(196, 240, 66, 0.12);
+            --accent-glow: rgba(196, 240, 66, 0.06);
+
+            --red-soft: #f0625e;
+            --blue-soft: #5eadf0;
+            --amber-soft: #f0c45e;
+
+            --font-display: 'Instrument Serif', Georgia, serif;
+            --font-body: 'DM Sans', system-ui, sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+
+            --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        html {
+            font-size: 16px;
+            scroll-behavior: smooth;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+        }
+
+        body {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: var(--font-body);
+            font-weight: 300;
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+
+        ::selection {
+            background: var(--accent);
+            color: var(--bg-primary);
+        }
+
+        a {
+            color: var(--accent);
+            text-decoration: none;
+            transition: opacity 0.2s;
+        }
+        a:hover { opacity: 0.8; }
+
+        /* ========== NOISE TEXTURE OVERLAY ========== */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.5;
+        }
+
+        /* ========== LAYOUT ========== */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        section {
+            padding: 6rem 0;
+        }
+
+        /* ========== NAV ========== */
+        nav {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 100;
+            padding: 1.25rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(8, 9, 10, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid transparent;
+            transition: border-color 0.3s;
+        }
+        nav.scrolled { border-bottom-color: var(--border); }
+
+        .nav-logo {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
+        }
+        .nav-logo span { color: var(--accent); }
+
+        .nav-links {
+            display: flex;
+            gap: 2.5rem;
+            list-style: none;
+        }
+        .nav-links a {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            font-weight: 400;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            transition: color 0.2s;
+        }
+        .nav-links a:hover { color: var(--text-primary); opacity: 1; }
+
+        /* ========== HERO ========== */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-bg-glow {
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            border-radius: 50%;
+            background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+            top: 20%;
+            right: -10%;
+            pointer-events: none;
+            animation: drift 12s ease-in-out infinite alternate;
+        }
+
+        @keyframes drift {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(-40px, 30px) scale(1.1); }
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            max-width: 820px;
+        }
+
+        .hero-eyebrow {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--accent);
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            margin-bottom: 1.5rem;
+            opacity: 0;
+            animation: fadeUp 0.8s var(--ease-out-expo) 0.2s forwards;
+        }
+
+        .hero h1 {
+            font-family: var(--font-display);
+            font-size: clamp(3rem, 7vw, 5.5rem);
+            font-weight: 400;
+            line-height: 1.08;
+            letter-spacing: -0.03em;
+            color: var(--text-primary);
+            margin-bottom: 1.5rem;
+            opacity: 0;
+            animation: fadeUp 0.8s var(--ease-out-expo) 0.35s forwards;
+        }
+
+        .hero h1 em {
+            font-style: italic;
+            color: var(--accent);
+        }
+
+        .hero-description {
+            font-size: 1.15rem;
+            color: var(--text-secondary);
+            max-width: 560px;
+            margin-bottom: 2.5rem;
+            opacity: 0;
+            animation: fadeUp 0.8s var(--ease-out-expo) 0.5s forwards;
+        }
+
+        .hero-cta-row {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            opacity: 0;
+            animation: fadeUp 0.8s var(--ease-out-expo) 0.65s forwards;
+        }
+
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.85rem 2rem;
+            background: var(--accent);
+            color: var(--bg-primary);
+            font-family: var(--font-body);
+            font-size: 0.9rem;
+            font-weight: 500;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: transform 0.2s var(--ease-out-expo), box-shadow 0.2s;
+        }
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 24px var(--accent-dim);
+            opacity: 1;
+            color: var(--bg-primary);
+        }
+
+        .btn-ghost {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.85rem 2rem;
+            background: transparent;
+            color: var(--text-secondary);
+            font-family: var(--font-body);
+            font-size: 0.9rem;
+            font-weight: 400;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: border-color 0.2s, color 0.2s;
+        }
+        .btn-ghost:hover {
+            border-color: var(--border-hover);
+            color: var(--text-primary);
+            opacity: 1;
+        }
+
+        .hero-status {
+            margin-top: 4rem;
+            display: flex;
+            gap: 3rem;
+            opacity: 0;
+            animation: fadeUp 0.8s var(--ease-out-expo) 0.8s forwards;
+        }
+
+        .status-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+        .status-label {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+        .status-value {
+            font-family: var(--font-display);
+            font-size: 1.6rem;
+            color: var(--text-primary);
+        }
+
+        /* ========== MODELS SECTION ========== */
+        .section-label {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            color: var(--accent);
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+        }
+
+        .section-title {
+            font-family: var(--font-display);
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 400;
+            letter-spacing: -0.02em;
+            margin-bottom: 1rem;
+        }
+
+        .section-subtitle {
+            color: var(--text-secondary);
+            font-size: 1.05rem;
+            max-width: 600px;
+            margin-bottom: 3.5rem;
+        }
+
+        .models-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(340px, 100%), 1fr));
+            gap: 1.5rem;
+        }
+
+        .model-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            transition: border-color 0.3s, transform 0.3s var(--ease-out-expo);
+            position: relative;
+            overflow: hidden;
+        }
+        .model-card:hover {
+            border-color: var(--border-hover);
+            transform: translateY(-3px);
+        }
+
+        .model-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+            background: var(--card-accent, var(--accent));
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .model-card:hover::before { opacity: 1; }
+
+        .model-number {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            letter-spacing: 0.1em;
+            margin-bottom: 1rem;
+        }
+
+        .model-name {
+            font-family: var(--font-display);
+            font-size: 1.6rem;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.01em;
+        }
+
+        .model-domain {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--card-accent, var(--accent));
+            letter-spacing: 0.05em;
+            margin-bottom: 1rem;
+        }
+
+        .model-description {
+            color: var(--text-secondary);
+            font-size: 0.92rem;
+            line-height: 1.65;
+            margin-bottom: 1.5rem;
+        }
+
+        .model-stack {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .tag {
+            font-family: var(--font-mono);
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            padding: 0.3rem 0.7rem;
+            border-radius: 4px;
+            letter-spacing: 0.03em;
+        }
+
+        .model-status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            letter-spacing: 0.05em;
+            margin-bottom: 1.25rem;
+        }
+        .model-status-badge .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        .dot.live { background: var(--accent); box-shadow: 0 0 8px var(--accent-dim); }
+        .dot.building { background: var(--amber-soft); }
+        .dot.planned { background: var(--text-muted); }
+
+        /* ========== RESEARCH SECTION ========== */
+        .research-section {
+            border-top: 1px solid var(--border);
+        }
+
+        .research-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+        }
+
+        .research-phase {
+            padding: 1.5rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .research-phase:last-child { border-bottom: none; }
+
+        .phase-label {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            color: var(--accent);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+        }
+
+        .phase-title {
+            font-family: var(--font-display);
+            font-size: 1.35rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .phase-weeks {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 0.75rem;
+        }
+
+        .phase-description {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .research-summary {
+            padding: 2.5rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            align-self: start;
+            position: sticky;
+            top: 6rem;
+        }
+
+        .research-summary h3 {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .research-summary p {
+            color: var(--text-secondary);
+            font-size: 0.92rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .paper-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .paper-list li {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            padding-left: 1rem;
+            border-left: 2px solid var(--border);
+            line-height: 1.5;
+        }
+        .paper-list li span {
+            color: var(--text-muted);
+            font-family: var(--font-mono);
+            font-size: 0.72rem;
+        }
+
+        /* ========== ABOUT / CTA SECTION ========== */
+        .about-section {
+            border-top: 1px solid var(--border);
+            text-align: center;
+        }
+
+        .about-section .section-subtitle {
+            margin-left: auto;
+            margin-right: auto;
+            max-width: 640px;
+        }
+
+        .about-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .about-links a {
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            letter-spacing: 0.05em;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 0.25rem;
+            transition: color 0.2s, border-color 0.2s;
+        }
+        .about-links a:hover {
+            color: var(--accent);
+            border-color: var(--accent);
+            opacity: 1;
+        }
+
+        /* ========== FOOTER ========== */
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 2.5rem 0;
+        }
+
+        .footer-inner {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .footer-left {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .footer-right {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* ========== ANIMATIONS ========== */
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.7s var(--ease-out-expo), transform 0.7s var(--ease-out-expo);
+        }
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ========== HAMBURGER MENU ========== */
+        .nav-toggle {
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 4px;
+            z-index: 110;
+        }
+        .nav-toggle span {
+            display: block;
+            width: 22px;
+            height: 2px;
+            background: var(--text-secondary);
+            border-radius: 2px;
+            transition: transform 0.3s, opacity 0.3s;
+        }
+        .nav-toggle.active span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+        .nav-toggle.active span:nth-child(2) { opacity: 0; }
+        .nav-toggle.active span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+        .mobile-menu {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(8, 9, 10, 0.95);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            z-index: 99;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 2rem;
+        }
+        .mobile-menu.open { display: flex; }
+        .mobile-menu a {
+            font-family: var(--font-display);
+            font-size: 2rem;
+            color: var(--text-primary);
+            transition: color 0.2s;
+        }
+        .mobile-menu a:hover { color: var(--accent); }
+
+        /* ========== RESPONSIVE ========== */
+        @media (max-width: 768px) {
+            .container { padding: 0 1.25rem; }
+            section { padding: 4rem 0; }
+
+            /* Nav — hamburger toggle */
+            .nav-links { display: none; }
+            .nav-toggle { display: flex; }
+
+            /* Hero — contain glow, scale type */
+            .hero { min-height: 90vh; }
+            .hero h1 { font-size: clamp(2.2rem, 8vw, 3.5rem); }
+            .hero-description { font-size: 1rem; }
+            .hero-bg-glow { width: 300px; height: 300px; right: -20%; top: 10%; }
+
+            .hero-status { flex-direction: column; gap: 1.5rem; }
+            .hero-cta-row {
+                flex-direction: column;
+                align-items: stretch;
+                width: 100%;
+            }
+            .btn-primary, .btn-ghost {
+                justify-content: center;
+                width: 100%;
+                text-align: center;
+            }
+
+            /* Model cards */
+            .models-grid { grid-template-columns: 1fr; }
+            .model-card { padding: 1.5rem; }
+            .model-name { font-size: 1.35rem; }
+
+            /* Research */
+            .research-grid {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+            .research-summary {
+                position: static;
+                padding: 1.75rem;
+            }
+
+            /* About & footer */
+            .about-links { flex-direction: column; align-items: center; gap: 1rem; }
+            .footer-inner { flex-direction: column; gap: 1rem; text-align: center; }
+        }
+
+        @media (max-width: 380px) {
+            .container { padding: 0 1rem; }
+            .hero h1 { font-size: 2rem; }
+            .hero-eyebrow { font-size: 0.65rem; }
+            .status-value { font-size: 1.3rem; }
+            .section-title { font-size: 1.75rem; }
+            .model-card { padding: 1.25rem; }
+            .tag { font-size: 0.62rem; padding: 0.25rem 0.5rem; }
+        }
+
+    </style>
+</head>
+<body>
+
+<!-- ========== NAV ========== -->
+<nav id="nav">
+    <div class="nav-logo">Arxelos<span>.</span></div>
+    <ul class="nav-links">
+        <li><a href="#models">Models</a></li>
+        <li><a href="#research">Research</a></li>
+        <li><a href="#about">About</a></li>
+        <li><a href="https://github.com/aryanp2107/Arxelos" target="_blank">GitHub</a></li>
+    </ul>
+    <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
+</nav>
+
+<!-- Mobile menu overlay -->
+<div class="mobile-menu" id="mobileMenu">
+    <a href="#models" class="mobile-link">Models</a>
+    <a href="#research" class="mobile-link">Research</a>
+    <a href="#about" class="mobile-link">About</a>
+    <a href="https://github.com/aryanp2107/Arxelos" target="_blank" class="mobile-link">GitHub</a>
+</div>
+
+<!-- ========== HERO ========== -->
+<section class="hero">
+    <div class="hero-bg-glow"></div>
+    <div class="container">
+        <div class="hero-content">
+            <div class="hero-eyebrow">Neuro-AI Research Platform</div>
+            <h1>Intelligence at the<br>edge of <em>biology.</em></h1>
+            <p class="hero-description">
+                Arxelos deploys research-grade AI models at the intersection of neuroscience and deep learning. Each model is a working artifact — built to demonstrate, not just describe.
+            </p>
+            <div class="hero-cta-row">
+                <a href="#models" class="btn-primary">Explore models ↓</a>
+                <a href="https://github.com/aryanp2107/Arxelos" target="_blank" class="btn-ghost">View source</a>
+            </div>
+            <div class="hero-status">
+                <div class="status-item">
+                    <span class="status-label">Models</span>
+                    <span class="status-value">3</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">Status</span>
+                    <span class="status-value">Building</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">Stack</span>
+                    <span class="status-value">PyTorch + FastAPI</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ========== MODELS ========== -->
+<section id="models">
+    <div class="container">
+        <div class="section-label reveal">The Platform</div>
+        <h2 class="section-title reveal">Three models. One thesis.</h2>
+        <p class="section-subtitle reveal">
+            Each model sits at the intersection of AI capability and biological insight — deployed, demo-ready, and built to withstand technical scrutiny.
+        </p>
+
+        <div class="models-grid">
+            <!-- Model 1 -->
+            <div class="model-card reveal" style="--card-accent: var(--red-soft);">
+                <div class="model-number">MODEL 01</div>
+                <div class="model-status-badge">
+                    <span class="dot building"></span>
+                    <span style="color: var(--amber-soft);">BUILDING</span>
+                </div>
+                <h3 class="model-name">Brain Tumor MRI Classifier</h3>
+                <div class="model-domain" style="color: var(--red-soft);">Medical Computer Vision</div>
+                <p class="model-description">
+                    4-class classification on 7,023 MRI scans. 96.2% test accuracy. 
+                    The fast win — already built, now being productionized with a clean upload UI and cloud deployment.
+                </p>
+                <div class="model-stack">
+                    <span class="tag">CNN</span>
+                    <span class="tag">FastAPI</span>
+                    <span class="tag">Docker</span>
+                    <span class="tag">TensorFlow</span>
+                </div>
+            </div>
+
+            <!-- Model 2 -->
+            <div class="model-card reveal" style="--card-accent: var(--blue-soft);">
+                <div class="model-number">MODEL 02</div>
+                <div class="model-status-badge">
+                    <span class="dot planned"></span>
+                    <span style="color: var(--text-muted);">PLANNED</span>
+                </div>
+                <h3 class="model-name">Virtual Lesions Visualizer</h3>
+                <div class="model-domain" style="color: var(--blue-soft);">Neuro-AI / Interpretability</div>
+                <p class="model-description">
+                    Ablate specific layers and channels in VGG-16 or ResNet-50. Measure whether 
+                    prediction deficits mirror biological visual deficits — prosopagnosia, akinetopsia, achromatopsia.
+                </p>
+                <div class="model-stack">
+                    <span class="tag">PyTorch</span>
+                    <span class="tag">Grad-CAM</span>
+                    <span class="tag">Saliency Maps</span>
+                    <span class="tag">Interactive</span>
+                </div>
+            </div>
+
+            <!-- Model 3 -->
+            <div class="model-card reveal" style="--card-accent: var(--amber-soft);">
+                <div class="model-number">MODEL 03</div>
+                <div class="model-status-badge">
+                    <span class="dot planned"></span>
+                    <span style="color: var(--text-muted);">PLANNED</span>
+                </div>
+                <h3 class="model-name">Medical Literature Q&A</h3>
+                <div class="model-domain" style="color: var(--amber-soft);">NLP / Retrieval-Augmented Generation</div>
+                <p class="model-description">
+                    Ingest PubMed abstracts, build a retrieval pipeline, generate domain-specific answers 
+                    with source citations. Medical RAG with cited sources — not another generic chatbot.
+                </p>
+                <div class="model-stack">
+                    <span class="tag">LangChain</span>
+                    <span class="tag">ChromaDB</span>
+                    <span class="tag">Transformers</span>
+                    <span class="tag">FastAPI</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ========== RESEARCH ========== -->
+<section id="research" class="research-section">
+    <div class="container">
+        <div class="section-label reveal">Independent Study</div>
+        <h2 class="section-title reveal">Neuro-AI Research Track</h2>
+        <p class="section-subtitle reveal">
+            An 8-week independent study mapping biological neural systems to deep learning architectures. 
+            Every lab produces a deployable artifact.
+        </p>
+
+        <div class="research-grid">
+            <div>
+                <div class="research-phase reveal">
+                    <div class="phase-label">Phase 1</div>
+                    <h3 class="phase-title">Bio-Electric Foundation</h3>
+                    <div class="phase-weeks">Weeks 1–2</div>
+                    <p class="phase-description">
+                        Neuroanatomy, Hodgkin–Huxley neuron models, Leaky Integrate-and-Fire simulations, 
+                        and mapping the human visual stream against CNN feature hierarchies.
+                    </p>
+                </div>
+
+                <div class="research-phase reveal">
+                    <div class="phase-label">Phase 2</div>
+                    <h3 class="phase-title">Systems & Computational Principles</h3>
+                    <div class="phase-weeks">Weeks 3–5</div>
+                    <p class="phase-description">
+                        Sparse coding, synaptic plasticity, STDP learning rules, Hopfield networks, 
+                        place cell representations, and RL agents with biologically-inspired state encodings.
+                    </p>
+                </div>
+
+                <div class="research-phase reveal">
+                    <div class="phase-label">Phase 3</div>
+                    <h3 class="phase-title">High-Level Cognition & Synthesis</h3>
+                    <div class="phase-weeks">Weeks 6–8</div>
+                    <p class="phase-description">
+                        Language processing parallels, mechanistic interpretability, circuit analysis, 
+                        and a capstone BCI neural signal decoder using EEG motor imagery data.
+                    </p>
+                </div>
+            </div>
+
+            <div class="research-summary reveal">
+                <h3>Key Papers</h3>
+                <p>The theoretical backbone — primary literature driving each phase of the study.</p>
+                <ul class="paper-list">
+                    <li>
+                        Felleman & Van Essen (1991)<br>
+                        <span>Distributed Hierarchical Processing in Primate Cortex</span>
+                    </li>
+                    <li>
+                        Hodgkin & Huxley (1952)<br>
+                        <span>Quantitative Description of Membrane Current</span>
+                    </li>
+                    <li>
+                        Olshausen & Field (1996)<br>
+                        <span>Emergence of Simple-Cell Receptive Fields</span>
+                    </li>
+                    <li>
+                        Bi & Poo (1998)<br>
+                        <span>Synaptic Modifications in Hippocampal Neurons</span>
+                    </li>
+                    <li>
+                        Moser, Kropff & Moser (2008)<br>
+                        <span>Place Cells, Grid Cells & Spatial Representation</span>
+                    </li>
+                    <li>
+                        Hassabis et al. (2017)<br>
+                        <span>Neuroscience-Inspired Artificial Intelligence</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ========== ABOUT ========== -->
+<section id="about" class="about-section">
+    <div class="container">
+        <div class="section-label reveal">About</div>
+        <h2 class="section-title reveal">Built by Aryan Patel</h2>
+        <p class="section-subtitle reveal">
+            MS in Artificial Intelligence at Northeastern University. Background in deep learning, 
+            computer vision, and NLP. Building toward the intersection of neuroscience and machine intelligence.
+        </p>
+        <div class="about-links reveal">
+            <a href="https://github.com/aryanp2107" target="_blank">GitHub</a>
+            <a href="https://linkedin.com/in/aryanp2107" target="_blank">LinkedIn</a>
+            <a href="mailto:patel.aryana@northeastern.edu">Email</a>
+        </div>
+    </div>
+</section>
+
+<!-- ========== FOOTER ========== -->
+<footer>
+    <div class="container">
+        <div class="footer-inner">
+            <div class="footer-left">&copy; 2026 Arxelos. MIT License.</div>
+            <div class="footer-right">Purpose-driven intelligence.</div>
+        </div>
+    </div>
+</footer>
+
+<!-- ========== SCRIPTS ========== -->
+<script>
+    // Nav scroll effect
+    const nav = document.getElementById('nav');
+    window.addEventListener('scroll', () => {
+        nav.classList.toggle('scrolled', window.scrollY > 40);
+    });
+
+    // Hamburger menu toggle
+    const navToggle = document.getElementById('navToggle');
+    const mobileMenu = document.getElementById('mobileMenu');
+
+    navToggle.addEventListener('click', () => {
+        navToggle.classList.toggle('active');
+        mobileMenu.classList.toggle('open');
+        document.body.style.overflow = mobileMenu.classList.contains('open') ? 'hidden' : '';
+    });
+
+    // Close mobile menu on link click
+    document.querySelectorAll('.mobile-link').forEach(link => {
+        link.addEventListener('click', () => {
+            navToggle.classList.remove('active');
+            mobileMenu.classList.remove('open');
+            document.body.style.overflow = '';
+        });
+    });
+
+    // Intersection Observer for reveal animations
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry, index) => {
+            if (entry.isIntersecting) {
+                // Stagger siblings
+                const siblings = entry.target.parentElement.querySelectorAll('.reveal');
+                const idx = Array.from(siblings).indexOf(entry.target);
+                entry.target.style.transitionDelay = `${idx * 0.1}s`;
+                entry.target.classList.add('visible');
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>

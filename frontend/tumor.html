@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brain Tumor MRI Classifier — Arxelos</title>
+    <meta name="description" content="Upload a brain MRI scan and get an AI-powered classification. Research demo by Arxelos.">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg-primary: #08090a;
+            --bg-elevated: #111214;
+            --bg-card: #16181b;
+            --border: #222528;
+            --border-hover: #3a3d42;
+            --text-primary: #e8e6e3;
+            --text-secondary: #8b8d90;
+            --text-muted: #55585c;
+            --accent: #c4f042;
+            --accent-dim: rgba(196, 240, 66, 0.12);
+            --red-soft: #f0625e;
+            --blue-soft: #5eadf0;
+            --amber-soft: #f0c45e;
+            --green-soft: #5ef08a;
+            --font-display: 'Instrument Serif', Georgia, serif;
+            --font-body: 'DM Sans', system-ui, sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+            --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        html { font-size: 16px; scroll-behavior: smooth; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+
+        body {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: var(--font-body);
+            font-weight: 300;
+            line-height: 1.7;
+            min-height: 100vh;
+        }
+
+        ::selection { background: var(--accent); color: var(--bg-primary); }
+        a { color: var(--accent); text-decoration: none; }
+
+        /* Noise overlay */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.5;
+        }
+
+        .container { max-width: 800px; margin: 0 auto; padding: 0 2rem; }
+
+        /* Nav */
+        nav {
+            padding: 1.25rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+        }
+        .nav-logo { font-family: var(--font-display); font-size: 1.5rem; color: var(--text-primary); }
+        .nav-logo span { color: var(--accent); }
+        .nav-back { font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-secondary); }
+        .nav-back:hover { color: var(--text-primary); }
+
+        /* Header */
+        .page-header {
+            padding: 3rem 0 2rem;
+            border-bottom: 1px solid var(--border);
+        }
+        .page-header .label {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            color: var(--red-soft);
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            margin-bottom: 0.75rem;
+        }
+        .page-header h1 {
+            font-family: var(--font-display);
+            font-size: clamp(2rem, 5vw, 3rem);
+            font-weight: 400;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.75rem;
+        }
+        .page-header p {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            max-width: 600px;
+        }
+
+        /* Stats row */
+        .stats-row {
+            display: flex;
+            gap: 2rem;
+            padding: 1.5rem 0;
+            border-bottom: 1px solid var(--border);
+            flex-wrap: wrap;
+        }
+        .stat { display: flex; flex-direction: column; gap: 0.15rem; }
+        .stat-label { font-family: var(--font-mono); font-size: 0.65rem; color: var(--text-muted); letter-spacing: 0.1em; text-transform: uppercase; }
+        .stat-value { font-family: var(--font-display); font-size: 1.3rem; color: var(--text-primary); }
+
+        /* Upload zone */
+        .upload-section { padding: 2.5rem 0; }
+
+        .drop-zone {
+            border: 2px dashed var(--border);
+            border-radius: 12px;
+            padding: 3rem 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.3s, background 0.3s;
+            position: relative;
+        }
+        .drop-zone:hover, .drop-zone.dragover {
+            border-color: var(--accent);
+            background: var(--accent-dim);
+        }
+        .drop-zone.has-image {
+            border-style: solid;
+            border-color: var(--border-hover);
+            padding: 1.5rem;
+        }
+
+        .drop-zone-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            opacity: 0.6;
+        }
+        .drop-zone-text { color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 0.5rem; }
+        .drop-zone-hint { font-family: var(--font-mono); font-size: 0.72rem; color: var(--text-muted); }
+
+        .drop-zone input[type="file"] {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        /* Preview */
+        .preview-container {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+        .preview-container.visible { display: flex; }
+
+        .preview-image {
+            max-width: 280px;
+            max-height: 280px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+        .preview-filename {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* Buttons */
+        .btn-predict {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.85rem 2.5rem;
+            background: var(--accent);
+            color: var(--bg-primary);
+            font-family: var(--font-body);
+            font-size: 0.9rem;
+            font-weight: 500;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: transform 0.2s var(--ease-out-expo), box-shadow 0.2s, opacity 0.2s;
+            margin-top: 1.5rem;
+        }
+        .btn-predict:hover { transform: translateY(-1px); box-shadow: 0 4px 24px var(--accent-dim); }
+        .btn-predict:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
+
+        .btn-reset {
+            background: transparent;
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+            padding: 0.6rem 1.5rem;
+            border-radius: 6px;
+            font-family: var(--font-body);
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: border-color 0.2s, color 0.2s;
+            margin-top: 0.75rem;
+        }
+        .btn-reset:hover { border-color: var(--border-hover); color: var(--text-primary); }
+
+        .action-row { display: flex; flex-direction: column; align-items: center; gap: 0; }
+
+        /* Loading */
+        .loading { display: none; flex-direction: column; align-items: center; gap: 1rem; padding: 2rem 0; }
+        .loading.visible { display: flex; }
+
+        .spinner {
+            width: 36px; height: 36px;
+            border: 3px solid var(--border);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .loading-text { font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-muted); }
+
+        /* Results */
+        .results {
+            display: none;
+            padding: 2rem 0 3rem;
+            animation: fadeUp 0.5s var(--ease-out-expo);
+        }
+        .results.visible { display: block; }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .result-class {
+            font-family: var(--font-display);
+            font-size: 1.8rem;
+            letter-spacing: -0.01em;
+        }
+
+        .result-confidence {
+            font-family: var(--font-mono);
+            font-size: 1.5rem;
+            color: var(--accent);
+        }
+
+        .result-description {
+            color: var(--text-secondary);
+            font-size: 0.92rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        /* Probability bars */
+        .prob-bars { display: flex; flex-direction: column; gap: 0.9rem; }
+
+        .prob-row {
+            display: grid;
+            grid-template-columns: 100px 1fr 55px;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .prob-label {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: capitalize;
+        }
+
+        .prob-bar-bg {
+            height: 8px;
+            background: var(--bg-elevated);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .prob-bar-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.8s var(--ease-out-expo);
+            min-width: 2px;
+        }
+
+        .prob-value {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-align: right;
+        }
+
+        /* Disclaimer */
+        .disclaimer {
+            background: rgba(240, 98, 94, 0.08);
+            border: 1px solid rgba(240, 98, 94, 0.2);
+            border-radius: 8px;
+            padding: 1.25rem 1.5rem;
+            font-size: 0.85rem;
+            color: var(--red-soft);
+            line-height: 1.6;
+        }
+        .disclaimer strong { font-weight: 500; }
+
+        /* Footer */
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 2rem 0;
+            text-align: center;
+        }
+        footer p {
+            font-family: var(--font-mono);
+            font-size: 0.72rem;
+            color: var(--text-muted);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container { padding: 0 1.25rem; }
+            .stats-row { gap: 1.5rem; }
+            .drop-zone { padding: 2rem 1.5rem; }
+            .preview-image { max-width: 220px; max-height: 220px; }
+            .prob-row { grid-template-columns: 80px 1fr 50px; gap: 0.5rem; }
+            .result-card { padding: 1.5rem; }
+        }
+
+        /* Error */
+        .error-msg {
+            display: none;
+            background: rgba(240, 98, 94, 0.1);
+            border: 1px solid rgba(240, 98, 94, 0.3);
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            color: var(--red-soft);
+            font-size: 0.88rem;
+            margin-top: 1rem;
+        }
+        .error-msg.visible { display: block; }
+    </style>
+</head>
+<body>
+
+<nav>
+    <a href="/" class="nav-logo">Arxelos<span>.</span></a>
+    <a href="/" class="nav-back">← Back to home</a>
+</nav>
+
+<div class="container">
+
+    <!-- Header -->
+    <div class="page-header">
+        <div class="label">Model 01 — Medical Computer Vision</div>
+        <h1>Brain Tumor MRI Classifier</h1>
+        <p>Upload a brain MRI scan to classify it into one of four categories using a deep CNN trained on 7,023 images.</p>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row">
+        <div class="stat">
+            <span class="stat-label">Accuracy</span>
+            <span class="stat-value">96.2%</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">Classes</span>
+            <span class="stat-value">4</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">Architecture</span>
+            <span class="stat-value">30-Layer CNN</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">Dataset</span>
+            <span class="stat-value">7,023 MRIs</span>
+        </div>
+    </div>
+
+    <!-- Upload -->
+    <div class="upload-section">
+        <div class="drop-zone" id="dropZone">
+            <div id="dropPrompt">
+                <div class="drop-zone-icon">🧠</div>
+                <p class="drop-zone-text">Drag & drop a brain MRI scan here, or click to browse</p>
+                <p class="drop-zone-hint">JPEG, PNG, or WebP · Max 10MB</p>
+            </div>
+            <div class="preview-container" id="previewContainer">
+                <img class="preview-image" id="previewImage" alt="MRI preview">
+                <span class="preview-filename" id="previewFilename"></span>
+            </div>
+            <input type="file" id="fileInput" accept="image/jpeg,image/png,image/webp">
+        </div>
+
+        <div class="action-row">
+            <button class="btn-predict" id="predictBtn" disabled>Classify MRI</button>
+            <button class="btn-reset" id="resetBtn" style="display:none;">Upload different image</button>
+        </div>
+
+        <div class="error-msg" id="errorMsg"></div>
+    </div>
+
+    <!-- Loading -->
+    <div class="loading" id="loading">
+        <div class="spinner"></div>
+        <span class="loading-text">Running inference...</span>
+    </div>
+
+    <!-- Results -->
+    <div class="results" id="results">
+        <div class="result-card">
+            <div class="result-header">
+                <div class="result-class" id="resultClass"></div>
+                <div class="result-confidence" id="resultConfidence"></div>
+            </div>
+            <p class="result-description" id="resultDescription"></p>
+            <div class="prob-bars" id="probBars"></div>
+        </div>
+
+        <div class="disclaimer">
+            <strong>⚠ Research Demo Only.</strong> This AI model is for educational and research purposes.
+            It is NOT a medical diagnostic tool. Never use this for clinical decision-making.
+            Always consult a qualified healthcare professional for medical advice.
+        </div>
+    </div>
+
+</div>
+
+<footer>
+    <p>&copy; 2026 Arxelos · <a href="https://github.com/aryanp2107/Arxelos">GitHub</a></p>
+</footer>
+
+<script>
+    // ---- Configuration ----
+    // Update this to your deployed API URL when live
+    const API_BASE = window.location.origin;
+    const PREDICT_URL = `${API_BASE}/api/v1/tumor/predict`;
+
+    // Color mapping for probability bars
+    const CLASS_COLORS = {
+        glioma: '#f0625e',
+        meningioma: '#f0c45e',
+        notumor: '#5ef08a',
+        pituitary: '#5eadf0',
+    };
+
+    // ---- Elements ----
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+    const dropPrompt = document.getElementById('dropPrompt');
+    const previewContainer = document.getElementById('previewContainer');
+    const previewImage = document.getElementById('previewImage');
+    const previewFilename = document.getElementById('previewFilename');
+    const predictBtn = document.getElementById('predictBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const loading = document.getElementById('loading');
+    const results = document.getElementById('results');
+    const errorMsg = document.getElementById('errorMsg');
+
+    let selectedFile = null;
+
+    // ---- File selection ----
+    fileInput.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) handleFile(e.target.files[0]);
+    });
+
+    // Drag and drop
+    dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.classList.add('dragover');
+    });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+    dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('dragover');
+        if (e.dataTransfer.files.length > 0) handleFile(e.dataTransfer.files[0]);
+    });
+
+    function handleFile(file) {
+        // Validate type
+        const allowed = ['image/jpeg', 'image/png', 'image/webp'];
+        if (!allowed.includes(file.type)) {
+            showError('Please upload a JPEG, PNG, or WebP image.');
+            return;
+        }
+        // Validate size
+        if (file.size > 10 * 1024 * 1024) {
+            showError('File is too large. Maximum size is 10MB.');
+            return;
+        }
+
+        selectedFile = file;
+        hideError();
+
+        // Show preview
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            previewImage.src = e.target.result;
+            previewFilename.textContent = file.name;
+            dropPrompt.style.display = 'none';
+            previewContainer.classList.add('visible');
+            dropZone.classList.add('has-image');
+            predictBtn.disabled = false;
+            resetBtn.style.display = 'inline-flex';
+            results.classList.remove('visible');
+        };
+        reader.readAsDataURL(file);
+    }
+
+    // ---- Reset ----
+    resetBtn.addEventListener('click', () => {
+        selectedFile = null;
+        fileInput.value = '';
+        previewContainer.classList.remove('visible');
+        dropPrompt.style.display = 'block';
+        dropZone.classList.remove('has-image');
+        predictBtn.disabled = true;
+        resetBtn.style.display = 'none';
+        results.classList.remove('visible');
+        hideError();
+    });
+
+    // ---- Predict ----
+    predictBtn.addEventListener('click', async () => {
+        if (!selectedFile) return;
+
+        hideError();
+        results.classList.remove('visible');
+        loading.classList.add('visible');
+        predictBtn.disabled = true;
+
+        try {
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+
+            const response = await fetch(PREDICT_URL, {
+                method: 'POST',
+                body: formData,
+            });
+
+            if (!response.ok) {
+                const err = await response.json().catch(() => ({}));
+                throw new Error(err.detail || `Server error (${response.status})`);
+            }
+
+            const data = await response.json();
+            displayResults(data);
+        } catch (err) {
+            showError(err.message || 'Failed to get prediction. Is the API server running?');
+        } finally {
+            loading.classList.remove('visible');
+            predictBtn.disabled = false;
+        }
+    });
+
+    // ---- Display results ----
+    function displayResults(data) {
+        document.getElementById('resultClass').textContent = data.display_label;
+        document.getElementById('resultConfidence').textContent =
+            (data.confidence * 100).toFixed(1) + '%';
+        document.getElementById('resultDescription').textContent = data.description;
+
+        // Build probability bars
+        const probBars = document.getElementById('probBars');
+        probBars.innerHTML = '';
+
+        // Sort by probability descending
+        const sorted = Object.entries(data.probabilities)
+            .sort((a, b) => b[1] - a[1]);
+
+        for (const [cls, prob] of sorted) {
+            const color = CLASS_COLORS[cls] || 'var(--accent)';
+            const pct = (prob * 100).toFixed(1);
+
+            const row = document.createElement('div');
+            row.className = 'prob-row';
+            row.innerHTML = `
+                <span class="prob-label">${cls}</span>
+                <div class="prob-bar-bg">
+                    <div class="prob-bar-fill" style="width: 0%; background: ${color};"></div>
+                </div>
+                <span class="prob-value">${pct}%</span>
+            `;
+            probBars.appendChild(row);
+
+            // Animate bar fill
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    row.querySelector('.prob-bar-fill').style.width = `${prob * 100}%`;
+                });
+            });
+        }
+
+        results.classList.add('visible');
+    }
+
+    // ---- Errors ----
+    function showError(msg) {
+        errorMsg.textContent = msg;
+        errorMsg.classList.add('visible');
+    }
+    function hideError() {
+        errorMsg.classList.remove('visible');
+    }
+</script>
+
+</body>
+</html>

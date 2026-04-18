@@ -1,0 +1,18 @@
+version: "3.9"
+
+services:
+  arxelos-api:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: arxelos-api
+    ports:
+      - "8000:8000"
+    volumes:
+      - ../backend:/app/backend
+      - ../frontend:/app/frontend
+    environment:
+      - DEBUG=true
+    env_file:
+      - ../.env
+    restart: unless-stopped
