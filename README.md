@@ -112,7 +112,6 @@ docker-compose up --build
 ## Author
 
 **Aryan Patel**
-MS in Artificial Intelligence — Northeastern University
 [aryanp2107](https://github.com/aryanp2107) · [patel.aryana@northeastern.edu](mailto:patel.aryana@northeastern.edu)
 
 ## License
