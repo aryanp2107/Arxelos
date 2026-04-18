@@ -1,0 +1,12 @@
+venv/
+.venv/
+__pycache__/
+*.pyc
+.git/
+.github/
+*.md
+LICENSE
+notebooks/
+docs/
+scripts/
+.env.example

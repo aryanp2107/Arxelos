@@ -406,6 +406,24 @@
         .dot.building { background: var(--amber-soft); }
         .dot.planned { background: var(--text-muted); }
 
+        .model-demo-link {
+            display: inline-block;
+            margin-top: 1.25rem;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            color: var(--accent);
+            letter-spacing: 0.03em;
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--accent);
+            border-radius: 5px;
+            transition: background 0.2s, color 0.2s;
+        }
+        .model-demo-link:hover {
+            background: var(--accent);
+            color: var(--bg-primary);
+            opacity: 1;
+        }
+
         /* ========== RESEARCH SECTION ========== */
         .research-section {
             border-top: 1px solid var(--border);
@@ -723,7 +741,7 @@
                 </div>
                 <div class="status-item">
                     <span class="status-label">Status</span>
-                    <span class="status-value">Building</span>
+                    <span class="status-value">1 Model Live</span>
                 </div>
                 <div class="status-item">
                     <span class="status-label">Stack</span>
@@ -748,14 +766,14 @@
             <div class="model-card reveal" style="--card-accent: var(--red-soft);">
                 <div class="model-number">MODEL 01</div>
                 <div class="model-status-badge">
-                    <span class="dot building"></span>
-                    <span style="color: var(--amber-soft);">BUILDING</span>
+                    <span class="dot live"></span>
+                    <span style="color: var(--accent);">LIVE</span>
                 </div>
                 <h3 class="model-name">Brain Tumor MRI Classifier</h3>
                 <div class="model-domain" style="color: var(--red-soft);">Medical Computer Vision</div>
                 <p class="model-description">
                     4-class classification on 7,023 MRI scans. 96.2% test accuracy. 
-                    The fast win — already built, now being productionized with a clean upload UI and cloud deployment.
+                    A deep CNN deployed with FastAPI, containerized with Docker, and running on Azure.
                 </p>
                 <div class="model-stack">
                     <span class="tag">CNN</span>
@@ -763,6 +781,7 @@
                     <span class="tag">Docker</span>
                     <span class="tag">TensorFlow</span>
                 </div>
+                <a href="http://arxelos-api.whiteglacier-1a803c76.canadacentral.azurecontainerapps.io/tumor" target="_blank" class="model-demo-link">Try live demo →</a>
             </div>
 
             <!-- Model 2 -->

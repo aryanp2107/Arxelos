@@ -1,7 +1,6 @@
 # Arxelos — Production Dockerfile
-# Multi-stage build for lean image
 
-FROM python:3.11-slim AS base
+FROM python:3.12-slim
 
 WORKDIR /app
 
@@ -10,13 +9,19 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     && rm -rf /var/lib/apt/lists/*
 
-# Python dependencies
+# Python dependencies (install first for Docker layer caching)
 COPY backend/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Application code
 COPY backend/ backend/
 COPY frontend/ frontend/
+
+# Model files
+COPY models/ models/
+
+# Environment config
+COPY .env .env
 
 # Expose port
 EXPOSE 8000
