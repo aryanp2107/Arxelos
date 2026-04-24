@@ -282,31 +282,6 @@
             opacity: 1;
         }
 
-        .hero-status {
-            margin-top: 4rem;
-            display: flex;
-            gap: 3rem;
-            opacity: 0;
-            animation: fadeUp 0.8s var(--ease-out-expo) 0.8s forwards;
-        }
-
-        .status-item {
-            display: flex;
-            flex-direction: column;
-            gap: 0.25rem;
-        }
-        .status-label {
-            font-family: var(--font-mono);
-            font-size: 0.7rem;
-            color: var(--text-muted);
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
-        }
-        .status-value {
-            font-family: var(--font-display);
-            font-size: 1.6rem;
-            color: var(--text-primary);
-        }
 
         /* ========== MODELS SECTION ========== */
         .section-label {
@@ -614,6 +589,91 @@
             transform: translateY(0);
         }
 
+        /* ========== JOURNAL SECTION ========== */
+        .journal-section {
+            border-top: 1px solid var(--border);
+        }
+
+        .journal-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr));
+            gap: 1.5rem;
+        }
+
+        .journal-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.75rem;
+            transition: border-color 0.3s, transform 0.3s var(--ease-out-expo);
+            display: flex;
+            flex-direction: column;
+        }
+        .journal-card:hover {
+            border-color: var(--border-hover);
+            transform: translateY(-3px);
+        }
+
+        .journal-date {
+            font-family: var(--font-mono);
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            letter-spacing: 0.08em;
+            margin-bottom: 0.75rem;
+        }
+
+        .journal-title {
+            font-family: var(--font-display);
+            font-size: 1.3rem;
+            letter-spacing: -0.01em;
+            margin-bottom: 0.6rem;
+            color: var(--text-primary);
+            line-height: 1.3;
+        }
+
+        .journal-excerpt {
+            color: var(--text-secondary);
+            font-size: 0.88rem;
+            line-height: 1.6;
+            flex-grow: 1;
+            margin-bottom: 1.25rem;
+        }
+
+        .journal-tags {
+            display: flex;
+            gap: 0.4rem;
+            flex-wrap: wrap;
+        }
+
+        .journal-tag {
+            font-family: var(--font-mono);
+            font-size: 0.62rem;
+            color: var(--accent);
+            background: var(--accent-dim);
+            padding: 0.2rem 0.55rem;
+            border-radius: 3px;
+            letter-spacing: 0.03em;
+        }
+
+        .journal-empty {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 3rem 2rem;
+            border: 1px dashed var(--border);
+            border-radius: 12px;
+        }
+        .journal-empty p {
+            color: var(--text-muted);
+            font-size: 0.92rem;
+        }
+        .journal-empty .coming {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--accent);
+            margin-top: 0.5rem;
+            letter-spacing: 0.05em;
+        }
+
         /* ========== HAMBURGER MENU ========== */
         .nav-toggle {
             display: none;
@@ -676,7 +736,6 @@
             .hero-description { font-size: 1rem; }
             .hero-bg-glow { width: 300px; height: 300px; right: -20%; top: 10%; }
 
-            .hero-status { flex-direction: column; gap: 1.5rem; }
             .hero-cta-row {
                 flex-direction: column;
                 align-items: stretch;
@@ -728,6 +787,7 @@
     <ul class="nav-links">
         <li><a href="#models">Models</a></li>
         <li><a href="#research">Research</a></li>
+        <li><a href="#journal">Journal</a></li>
         <li><a href="#about">About</a></li>
         <li><a href="https://github.com/aryanp2107/Arxelos" target="_blank">GitHub</a></li>
     </ul>
@@ -742,6 +802,7 @@
 <div class="mobile-menu" id="mobileMenu">
     <a href="#models" class="mobile-link">Models</a>
     <a href="#research" class="mobile-link">Research</a>
+    <a href="#journal" class="mobile-link">Journal</a>
     <a href="#about" class="mobile-link">About</a>
     <a href="https://github.com/aryanp2107/Arxelos" target="_blank" class="mobile-link">GitHub</a>
 </div>
@@ -755,25 +816,11 @@
                 <div class="hero-eyebrow">Neuro-AI Research Platform</div>
                 <h1>Intelligence at the<br>edge of <em>biology.</em></h1>
                 <p class="hero-description">
-                    Arxelos deploys research-grade AI models at the intersection of neuroscience and deep learning. Each model is a working artifact — built to demonstrate, not just describe.
+                    Arxelos deploys research-grade AI models at the intersection of neuroscience and deep learning. To replicate the astonishing capabilities of the human brain, we must first understand how it works. Each model is a working artifact — built to demonstrate, not just describe.
                 </p>
                 <div class="hero-cta-row">
                     <a href="#models" class="btn-primary">Explore models ↓</a>
                     <a href="https://github.com/aryanp2107/Arxelos" target="_blank" class="btn-ghost">View source</a>
-                </div>
-                <div class="hero-status">
-                    <div class="status-item">
-                        <span class="status-label">Models</span>
-                        <span class="status-value">3</span>
-                    </div>
-                    <div class="status-item">
-                        <span class="status-label">Status</span>
-                        <span class="status-value">1 Model Live</span>
-                    </div>
-                    <div class="status-item">
-                        <span class="status-label">Stack</span>
-                        <span class="status-value">PyTorch + FastAPI</span>
-                    </div>
                 </div>
             </div>
             <div class="hero-visual">
@@ -866,7 +913,7 @@
         <div class="section-label reveal">Independent Study</div>
         <h2 class="section-title reveal">Neuro-AI Research Track</h2>
         <p class="section-subtitle reveal">
-            An 8-week independent study mapping biological neural systems to deep learning architectures. 
+            An independent study mapping biological neural systems to deep learning architectures. 
             Every lab produces a deployable artifact.
         </p>
 
@@ -875,7 +922,6 @@
                 <div class="research-phase reveal">
                     <div class="phase-label">Phase 1</div>
                     <h3 class="phase-title">Bio-Electric Foundation</h3>
-                    <div class="phase-weeks">Weeks 1–2</div>
                     <p class="phase-description">
                         Neuroanatomy, Hodgkin–Huxley neuron models, Leaky Integrate-and-Fire simulations, 
                         and mapping the human visual stream against CNN feature hierarchies.
@@ -885,7 +931,6 @@
                 <div class="research-phase reveal">
                     <div class="phase-label">Phase 2</div>
                     <h3 class="phase-title">Systems & Computational Principles</h3>
-                    <div class="phase-weeks">Weeks 3–5</div>
                     <p class="phase-description">
                         Sparse coding, synaptic plasticity, STDP learning rules, Hopfield networks, 
                         place cell representations, and RL agents with biologically-inspired state encodings.
@@ -895,7 +940,6 @@
                 <div class="research-phase reveal">
                     <div class="phase-label">Phase 3</div>
                     <h3 class="phase-title">High-Level Cognition & Synthesis</h3>
-                    <div class="phase-weeks">Weeks 6–8</div>
                     <p class="phase-description">
                         Language processing parallels, mechanistic interpretability, circuit analysis, 
                         and a capstone BCI neural signal decoder using EEG motor imagery data.
@@ -937,13 +981,52 @@
     </div>
 </section>
 
+<!-- ========== JOURNAL ========== -->
+<section id="journal" class="journal-section">
+    <div class="container">
+        <div class="section-label reveal">Journal</div>
+        <h2 class="section-title reveal">Notes from the lab.</h2>
+        <p class="section-subtitle reveal">
+            Thoughts on neuroscience, deep learning, and the space between — written as I build.
+        </p>
+
+        <div class="journal-grid">
+            <a href="/journal/hebbian-learning-vs-backpropagation.html" class="journal-card reveal" style="text-decoration:none; color:inherit;">
+                <div class="journal-date">APRIL 2026</div>
+                <h3 class="journal-title">Hebbian Learning vs Backpropagation</h3>
+                <p class="journal-excerpt">
+                    Every neural network you've ever trained learned through backpropagation. Every neuron in your brain learned without it. What AI lost by abandoning biology — and why the field is circling back.
+                </p>
+                <div class="journal-tags">
+                    <span class="journal-tag">Neuro-AI</span>
+                    <span class="journal-tag">Hebbian Learning</span>
+                    <span class="journal-tag">Backpropagation</span>
+                </div>
+            </a>
+
+            <a href="/journal/ai-weather-forecastings-critical-blind-spot.html" class="journal-card reveal" style="text-decoration:none; color:inherit;">
+                <div class="journal-date">MARCH 5, 2026</div>
+                <h3 class="journal-title">AI Weather Forecasting's Critical Blind Spot</h3>
+                <p class="journal-excerpt">
+                    Google's GraphCast can generate a 10-day forecast in under a minute. But when researchers tested AI models on Category 5 hurricanes, they failed catastrophically.
+                </p>
+                <div class="journal-tags">
+                    <span class="journal-tag">AI Safety</span>
+                    <span class="journal-tag">Weather</span>
+                    <span class="journal-tag">Distribution Shift</span>
+                </div>
+            </a>
+        </div>
+    </div>
+</section>
+
 <!-- ========== ABOUT ========== -->
 <section id="about" class="about-section">
     <div class="container">
         <div class="section-label reveal">About</div>
         <h2 class="section-title reveal">Built by Aryan Patel</h2>
         <p class="section-subtitle reveal">
-            MS in Artificial Intelligence at Northeastern University. Background in deep learning, 
+            A curious mind with a passion for building intelligent systems. Background in deep learning, 
             computer vision, and NLP. Building toward the intersection of neuroscience and machine intelligence.
         </p>
         <div class="about-links reveal">

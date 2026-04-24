@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Weather Forecasting's Critical Blind Spot — Arxelos Journal</title>
+    <meta name="description" content="Google's GraphCast can generate a 10-day forecast in under a minute. But when researchers tested AI models on Category 5 hurricanes, they failed catastrophically.">
+    <meta name="author" content="Aryan Patel">
+
+    <meta property="og:title" content="AI Weather Forecasting's Critical Blind Spot — Arxelos">
+    <meta property="og:description" content="Can predict tomorrow's weather perfectly but fails when we need it most.">
+    <meta property="og:type" content="article">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg-primary: #08090a;
+            --bg-elevated: #111214;
+            --bg-card: #16181b;
+            --border: #222528;
+            --border-hover: #3a3d42;
+            --text-primary: #e8e6e3;
+            --text-secondary: #8b8d90;
+            --text-muted: #55585c;
+            --accent: #c4f042;
+            --accent-dim: rgba(196, 240, 66, 0.12);
+            --font-display: 'Instrument Serif', Georgia, serif;
+            --font-body: 'DM Sans', system-ui, sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        html { font-size: 16px; scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+
+        body {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: var(--font-body);
+            font-weight: 300;
+            line-height: 1.7;
+        }
+
+        ::selection { background: var(--accent); color: var(--bg-primary); }
+        a { color: var(--accent); text-decoration: none; transition: opacity 0.2s; }
+        a:hover { opacity: 0.8; }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.5;
+        }
+
+        nav {
+            padding: 1.25rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+        }
+        .nav-logo { font-family: var(--font-display); font-size: 1.5rem; color: var(--text-primary); }
+        .nav-logo span { color: var(--accent); }
+        .nav-back { font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-secondary); }
+        .nav-back:hover { color: var(--text-primary); }
+
+        .article-container { max-width: 720px; margin: 0 auto; padding: 0 2rem; }
+
+        .article-cover { margin-bottom: 2rem; border-radius: 10px; overflow: hidden; border: 1px solid var(--border); }
+        .article-cover img { width: 100%; height: auto; display: block; aspect-ratio: 16 / 9; object-fit: cover; }
+
+        .article-header { padding: 4rem 0 2.5rem; border-bottom: 1px solid var(--border); margin-bottom: 2.5rem; }
+        .article-meta { display: flex; align-items: center; gap: 1.5rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+        .article-date { font-family: var(--font-mono); font-size: 0.72rem; color: var(--text-muted); letter-spacing: 0.1em; text-transform: uppercase; }
+        .article-tags { display: flex; gap: 0.4rem; }
+        .article-tag { font-family: var(--font-mono); font-size: 0.62rem; color: var(--accent); background: var(--accent-dim); padding: 0.2rem 0.55rem; border-radius: 3px; letter-spacing: 0.03em; }
+
+        .article-header h1 {
+            font-family: var(--font-display);
+            font-size: clamp(2rem, 5vw, 2.8rem);
+            font-weight: 400;
+            line-height: 1.15;
+            letter-spacing: -0.02em;
+            margin-bottom: 1rem;
+        }
+
+        .article-subtitle { font-size: 1.1rem; color: var(--text-secondary); line-height: 1.6; font-style: italic; }
+
+        .article-author { display: flex; align-items: center; gap: 0.75rem; margin-top: 1.5rem; }
+        .author-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--accent-dim); display: flex; align-items: center; justify-content: center; font-family: var(--font-mono); font-size: 0.7rem; color: var(--accent); font-weight: 500; }
+        .author-name { font-size: 0.88rem; color: var(--text-primary); font-weight: 400; }
+        .author-title { font-size: 0.75rem; color: var(--text-muted); }
+
+        .article-body { padding-bottom: 4rem; }
+        .article-body p { color: var(--text-secondary); font-size: 1.02rem; line-height: 1.8; margin-bottom: 1.5rem; }
+        .article-body h2 { font-family: var(--font-display); font-size: 1.6rem; font-weight: 400; color: var(--text-primary); margin-top: 2.5rem; margin-bottom: 1rem; letter-spacing: -0.01em; }
+        .article-body h3 { font-family: var(--font-display); font-size: 1.3rem; font-weight: 400; color: var(--text-primary); margin-top: 2rem; margin-bottom: 0.75rem; }
+        .article-body strong { color: var(--text-primary); font-weight: 500; }
+        .article-body em { font-style: italic; color: var(--text-primary); }
+        .article-body code { font-family: var(--font-mono); font-size: 0.88rem; background: var(--bg-elevated); padding: 0.15rem 0.4rem; border-radius: 3px; color: var(--accent); }
+
+        .callout { background: var(--bg-card); border-left: 3px solid var(--accent); border-radius: 0 8px 8px 0; padding: 1.25rem 1.5rem; margin: 2rem 0; }
+        .callout p { color: var(--text-primary) !important; font-size: 0.95rem !important; margin-bottom: 0 !important; line-height: 1.7; }
+
+        .article-separator { border: none; border-top: 1px solid var(--border); margin: 2.5rem 0; }
+
+        .article-end { border-top: 1px solid var(--border); padding: 2.5rem 0; text-align: center; }
+        .article-end p { color: var(--text-muted); font-size: 0.88rem; margin-bottom: 1rem; }
+        .article-end-links { display: flex; justify-content: center; gap: 1.5rem; }
+        .article-end-links a { font-family: var(--font-mono); font-size: 0.78rem; color: var(--text-secondary); border-bottom: 1px solid var(--border); padding-bottom: 0.2rem; transition: color 0.2s, border-color 0.2s; }
+        .article-end-links a:hover { color: var(--accent); border-color: var(--accent); opacity: 1; }
+
+        footer { border-top: 1px solid var(--border); padding: 2rem 0; text-align: center; }
+        footer p { font-family: var(--font-mono); font-size: 0.72rem; color: var(--text-muted); }
+
+        @media (max-width: 768px) {
+            .article-container { padding: 0 1.25rem; }
+            .article-header { padding: 3rem 0 2rem; }
+            .callout { padding: 1rem 1.25rem; }
+        }
+    </style>
+</head>
+<body>
+
+<nav>
+    <a href="/" class="nav-logo">Arxelos<span>.</span></a>
+    <a href="/#journal" class="nav-back">← Back to journal</a>
+</nav>
+
+<div class="article-container">
+
+    <header class="article-header">
+        <div class="article-cover">
+            <img src="/images/ai-weather-cover.jpg" alt="Cover image for AI Weather Forecasting's Critical Blind Spot">
+        </div>
+        <div class="article-meta">
+            <span class="article-date">March 5, 2026</span>
+            <div class="article-tags">
+                <span class="article-tag">AI Safety</span>
+                <span class="article-tag">Weather</span>
+                <span class="article-tag">Distribution Shift</span>
+            </div>
+        </div>
+        <h1>AI Weather Forecasting's Critical Blind Spot</h1>
+        <p class="article-subtitle">Can predict tomorrow's weather perfectly but fails when we need it most.</p>
+        <div class="article-author">
+            <div class="author-avatar">AP</div>
+            <div>
+                <div class="author-name">Aryan Patel</div>
+                <div class="author-title">MS AI @ Northeastern · arxelos.com</div>
+            </div>
+        </div>
+    </header>
+
+    <article class="article-body">
+        <p>Google's GraphCast can generate a 10-day weather forecast in under a minute. It beats the world's best supercomputer-based systems on accuracy. It runs on a single processor instead of requiring machines that cost tens of millions of dollars.</p>
+
+        <p>And yet, there's a problem nobody's talking about.</p>
+
+        <p>When researchers at the University of Chicago tested these AI models on the exact weather events we need them for — Category 5 hurricanes, unprecedented heat waves, catastrophic floods — they failed. Not marginally. <strong>Catastrophically.</strong></p>
+
+        <h2>The Experiment That Changed Everything</h2>
+
+        <p>Dr. Yongqiang Sun and his team did something clever. They trained NVIDIA's FourCastNet weather model on 40 years of data, but deliberately removed every hurricane stronger than Category 2. Then they tested it on Category 5 storms.</p>
+
+        <div class="callout"><p>The model consistently predicted the storms would weaken when they were actually intensifying to catastrophic strength. It saw something coming, but always guessed Category 2 when reality was Category 5.</p></div>
+
+        <p>Think about what that means for an actual emergency. You're told to prepare for a moderate storm. In reality, a catastrophic hurricane is about to make landfall. That's not a minor forecasting error — that's the difference between evacuation and disaster.</p>
+
+        <h2>Why This Happens</h2>
+
+        <p>AI weather models work like ChatGPT — they're sophisticated pattern-matching systems. Feed them decades of weather data, and they learn to predict what typically comes next. On normal days, they're incredible. Google's GenCast outperforms traditional models on 97% of forecasts and does it 8 times faster.</p>
+
+        <p>But here's the catch: they've never seen a Category 5 hurricane in their training data. So when atmospheric conditions start building toward one, they extrapolate based on Category 2 patterns. It's like asking someone who's only seen light rain to predict a tsunami.</p>
+
+        <p>Traditional physics-based models actually understand fluid dynamics and thermodynamics. They solve equations that remain valid whether it's a Category 2 or Category 5 storm. They're slower and more expensive, but they don't fail when conditions exceed anything in their training data.</p>
+
+        <h2>The Climate Change Problem</h2>
+
+        <p>This gets worse. Climate change is creating weather we've literally never seen before — the 2021 Pacific Northwest heat dome, Hurricane Harvey's 1-in-2000-year flooding. These "gray swan" events are becoming more common, but by definition, they're not in the historical record AI models train on.</p>
+
+        <p>We're heading toward a future where <strong>the weather we need to predict most accurately is exactly the weather AI models are worst at predicting.</strong></p>
+
+        <h2>What's Being Done</h2>
+
+        <p>Researchers aren't giving up. They're exploring something called "active learning" — using AI to guide physics-based models in generating synthetic examples of extreme events. Basically, teaching the AI what catastrophic storms look like by mathematically creating them rather than waiting for them to happen.</p>
+
+        <p>There's also promising work on hybrid models like NeuralGCM that combine physics equations with neural networks. Early results suggest these do better on unprecedented events while keeping most of AI's speed advantages.</p>
+
+        <h2>Why This Matters Beyond Weather</h2>
+
+        <p>This represents a fundamental challenge in AI deployment. We see the same pattern everywhere: models perform brilliantly on test sets, then fail silently on edge cases.</p>
+
+        <p>Autonomous vehicles trained on California roads struggling with snow. Medical AI diagnosing common conditions but missing rare diseases. Financial models predicting normal market behavior but missing crashes.</p>
+
+        <p>The weather forecasting problem is just the most visible example because we can measure it objectively. A hurricane either hits or it doesn't.</p>
+
+        <h2>The Real Question</h2>
+
+        <p>Can we build AI systems reliable enough for life-or-death decisions when they'll inevitably encounter situations they've never seen before? Or do we need humans and traditional methods in the loop for anything safety-critical?</p>
+
+        <p>Right now, weather agencies are hedging. They use AI for daily forecasts but switch to physics-based models when extreme events appear possible. That's probably the right call — but it means we haven't actually solved the problem we most need AI for.</p>
+
+        <hr class="article-separator">
+
+        <p><em>What's your take? Are hybrid AI-physics models the answer, or is this a fundamental limitation of data-driven approaches?</em></p>
+    </article>
+
+    <div class="article-end">
+        <p>Written by Aryan Patel · Arxelos Journal</p>
+        <div class="article-end-links">
+            <a href="/#journal">More articles</a>
+            <a href="https://linkedin.com/in/aryanp2107" target="_blank">Follow on LinkedIn</a>
+            <a href="/">Back to Arxelos</a>
+        </div>
+    </div>
+
+</div>
+
+<footer>
+    <p>&copy; 2026 Arxelos · <a href="https://github.com/aryanp2107/Arxelos">GitHub</a></p>
+</footer>
+
+</body>
+</html>
